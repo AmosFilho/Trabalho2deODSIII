@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SeguroChain — dApp de Seguro Veicular</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========================================================
+       CABEÇALHO
+  ========================================================= -->
+  <header class="app-header">
+    <div class="header-inner">
+      <h1>🔗 SeguroChain</h1>
+      <p class="subtitle">dApp de Seguro Veicular — Ethereum Sepolia</p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ======================================================
+         SEÇÃO 1 · CONEXÃO COM METAMASK
+    ======================================================= -->
+    <section class="card" id="sec-conexao">
+      <h2>🦊 Conexão</h2>
+      <button id="btn-conectar" onclick="conectar()">Conectar MetaMask</button>
+      <div id="info-conexao" class="info-box hidden">
+        <p><strong>Conta:</strong> <span id="txt-conta">—</span></p>
+        <p><strong>Rede (Chain ID):</strong> <span id="txt-rede">—</span></p>
+        <p id="aviso-rede" class="aviso hidden">⚠️ Conecte-se à rede <strong>Sepolia</strong> (Chain ID 11155111) no MetaMask.</p>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SEÇÃO 2 · EMITIR APÓLICE (apenas owner/seguradora)
+    ======================================================= -->
+    <section class="card" id="sec-emitir">
+      <h2>📋 Emitir Apólice <span class="badge badge-owner">Seguradora</span></h2>
+      <p class="card-desc">Apenas o endereço da seguradora (owner do contrato) pode emitir apólices.</p>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="e-proprietario">Endereço do Proprietário</label>
+          <input type="text" id="e-proprietario" placeholder="0x..." />
+        </div>
+        <div class="form-group">
+          <label for="e-modelo">Modelo / Identificação do Veículo</label>
+          <input type="text" id="e-modelo" placeholder="Ex.: Toyota Corolla 2.0" />
+        </div>
+        <div class="form-group">
+          <label for="e-placa">Placa do Veículo</label>
+          <input type="text" id="e-placa" placeholder="Ex.: ABC-1234" />
+        </div>
+        <div class="form-group">
+          <label for="e-ano">Ano do Veículo</label>
+          <input type="number" id="e-ano" placeholder="Ex.: 2022" min="1900" max="2100" />
+        </div>
+        <div class="form-group">
+          <label for="e-valor-segurado">Valor Segurado (ETH)</label>
+          <input type="number" id="e-valor-segurado" placeholder="Ex.: 1.5" step="0.001" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="e-franquia">Franquia (ETH)</label>
+          <input type="number" id="e-franquia" placeholder="Ex.: 0.1" step="0.001" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="e-data-inicio">Data de Início da Vigência</label>
+          <input type="datetime-local" id="e-data-inicio" />
+        </div>
+        <div class="form-group">
+          <label for="e-data-fim">Data de Fim da Vigência</label>
+          <input type="datetime-local" id="e-data-fim" />
+        </div>
+      </div>
+
+      <div class="form-group coberturas-group">
+        <label>Coberturas Contratadas</label>
+        <div class="checkbox-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="cob-colisao" />
+            🚗 Colisão
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="cob-roubo" />
+            🔒 Roubo
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="cob-incendio" />
+            🔥 Incêndio
+          </label>
+        </div>
+      </div>
+
+      <button onclick="emitirApolice()">Emitir Apólice</button>
+      <div id="result-emitir" class="result-box hidden"></div>
+    </section>
+
+    <!-- ======================================================
+         SEÇÃO 3 · CONSULTAR APÓLICE
+    ======================================================= -->
+    <section class="card" id="sec-consultar">
+      <h2>🔍 Consultar Apólice</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="c-apolice-id">ID da Apólice</label>
+          <input type="number" id="c-apolice-id" placeholder="Ex.: 1" min="1" />
+        </div>
+        <button onclick="consultarApolice()">Consultar</button>
+      </div>
+
+      <div id="result-consultar" class="result-box hidden">
+        <h3>Dados da Apólice</h3>
+        <table class="data-table" id="tabela-apolice">
+          <tbody>
+            <tr><th>ID</th><td id="d-id">—</td></tr>
+            <tr><th>Proprietário</th><td id="d-proprietario">—</td></tr>
+            <tr><th>Modelo</th><td id="d-modelo">—</td></tr>
+            <tr><th>Placa</th><td id="d-placa">—</td></tr>
+            <tr><th>Ano</th><td id="d-ano">—</td></tr>
+            <tr><th>Valor Segurado</th><td id="d-valor-segurado">—</td></tr>
+            <tr><th>Franquia</th><td id="d-franquia">—</td></tr>
+            <tr><th>Vigência</th><td id="d-vigencia">—</td></tr>
+            <tr><th>Coberturas</th><td id="d-coberturas">—</td></tr>
+            <tr><th>Valor Comprometido</th><td id="d-comprometido">—</td></tr>
+            <tr><th>Saldo Disponível</th><td id="d-saldo">—</td></tr>
+            <tr><th>Status</th><td id="d-status">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SEÇÃO 4 · REGISTRAR SINISTRO (segurado)
+    ======================================================= -->
+    <section class="card" id="sec-sinistro">
+      <h2>⚠️ Registrar Sinistro <span class="badge badge-user">Segurado</span></h2>
+      <p class="card-desc">Apenas o proprietário da apólice pode registrar um sinistro.</p>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="s-apolice-id">ID da Apólice</label>
+          <input type="number" id="s-apolice-id" placeholder="Ex.: 1" min="1" />
+        </div>
+        <div class="form-group">
+          <label for="s-tipo">Tipo de Cobertura</label>
+          <select id="s-tipo">
+            <option value="0">🚗 Colisão (COLISAO)</option>
+            <option value="1">🔒 Roubo (ROUBO)</option>
+            <option value="2">🔥 Incêndio (INCENDIO)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="s-valor">Valor Solicitado (ETH)</label>
+          <input type="number" id="s-valor" placeholder="Ex.: 0.5" step="0.001" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="s-data">Data do Sinistro</label>
+          <input type="datetime-local" id="s-data" />
+        </div>
+      </div>
+
+      <button onclick="registrarSinistro()">Registrar Sinistro</button>
+      <div id="result-sinistro" class="result-box hidden"></div>
+    </section>
+
+    <!-- ======================================================
+         SEÇÃO 5 · ANALISAR SINISTRO (owner)
+    ======================================================= -->
+    <section class="card" id="sec-analisar">
+      <h2>🔬 Analisar Sinistro <span class="badge badge-owner">Seguradora</span></h2>
+      <p class="card-desc">A seguradora analisa o sinistro aplicando as regras de negócio automaticamente.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="a-sinistro-id">ID do Sinistro</label>
+          <input type="number" id="a-sinistro-id" placeholder="Ex.: 1" min="1" />
+        </div>
+        <button onclick="analisarSinistro()">Analisar</button>
+      </div>
+
+      <div id="result-analisar" class="result-box hidden"></div>
+    </section>
+
+    <!-- ======================================================
+         SEÇÃO 6 · PAGAR SINISTRO (owner)
+    ======================================================= -->
+    <section class="card" id="sec-pagar">
+      <h2>💰 Pagar Sinistro <span class="badge badge-owner">Seguradora</span></h2>
+      <p class="card-desc">Registra o pagamento de um sinistro previamente aprovado.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="p-sinistro-id">ID do Sinistro</label>
+          <input type="number" id="p-sinistro-id" placeholder="Ex.: 1" min="1" />
+        </div>
+        <button onclick="pagarSinistro()">Pagar Sinistro</button>
+      </div>
+
+      <div id="result-pagar" class="result-box hidden"></div>
+    </section>
+
+    <!-- ======================================================
+         ÁREA DE STATUS / LOG GLOBAL
+    ======================================================= -->
+    <section class="card" id="sec-status">
+      <h2>📡 Log de Atividade</h2>
+      <div id="status-log" class="status-log">
+        <p class="log-entry log-info">Aguardando conexão com MetaMask…</p>
+      </div>
+      <button class="btn-secondary" onclick="limparLog()">Limpar Log</button>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>SeguroChain dApp · Ethereum Sepolia · ODS III · 2024</p>
+    <p>Contrato: <span id="footer-address">0x0000...0000</span></p>
+  </footer>
+
+  <!-- Web3.js v4 via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@4.16.0/dist/web3.min.js"></script>
+  <!-- Lógica do dApp -->
+  <script src="app.js"></script>
+</body>
+</html>
